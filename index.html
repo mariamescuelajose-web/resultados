@@ -461,6 +461,146 @@
       }
     }
 
+
+    .indicador-hojas {
+      display: grid;
+      grid-template-columns: auto minmax(40px, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+      max-width: 610px;
+      margin: 22px auto 18px;
+    }
+
+    .paso-hoja {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #81776d;
+      font-size: 14px;
+    }
+
+    .paso-hoja span {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      flex: 0 0 34px;
+      color: #6c6258;
+      background: #eee9e3;
+      border: 2px solid #d3c8bc;
+      border-radius: 50%;
+      font-weight: 800;
+    }
+
+    .paso-hoja.activo {
+      color: var(--guinda);
+    }
+
+    .paso-hoja.activo span {
+      color: var(--blanco);
+      background: var(--guinda);
+      border-color: var(--dorado);
+    }
+
+    .linea-pasos {
+      height: 3px;
+      background: #ddd4ca;
+      border-radius: 20px;
+    }
+
+    .titulo-hoja {
+      margin: 6px 0 14px;
+      text-align: center;
+    }
+
+    .titulo-hoja p {
+      margin: 0 0 3px;
+      color: #786e64;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .titulo-hoja h5 {
+      margin: 0;
+      color: var(--guinda);
+      font-size: 22px;
+    }
+
+    .tabla-aciertos {
+      min-width: 620px !important;
+    }
+
+    .tabla-datos {
+      min-width: 850px !important;
+    }
+
+    .col-check {
+      width: 120px;
+      text-align: center;
+    }
+
+    .check-celda {
+      text-align: center;
+    }
+
+    .check-control {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .check-control input {
+      width: 27px;
+      height: 27px;
+      margin: 0;
+      cursor: pointer;
+      accent-color: var(--guinda);
+    }
+
+    .check-control input:focus-visible {
+      outline: 3px solid rgba(188, 149, 92, 0.5);
+      outline-offset: 3px;
+    }
+
+    .instruccion-check {
+      margin: 0 0 14px;
+      padding: 12px 15px;
+      color: #5f554c;
+      background: #fbf7f2;
+      border-left: 4px solid var(--dorado);
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .navegacion-hojas {
+      display: grid;
+      grid-template-columns: minmax(190px, 0.42fr) minmax(260px, 1fr);
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .boton-anterior {
+      min-height: 50px;
+      padding: 12px 16px;
+      color: var(--guinda);
+      background: var(--blanco);
+      border: 2px solid var(--guinda);
+      border-radius: 9px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .boton-final {
+      margin-top: 0;
+    }
+
     @media (max-width: 760px) {
       body {
         padding:
@@ -586,6 +726,63 @@
        * En celular la tabla se convierte en tarjetas.
        * Así se elimina por completo el desplazamiento horizontal.
        */
+      .indicador-hojas {
+        grid-template-columns: auto minmax(18px, 1fr) auto;
+        gap: 6px;
+        margin: 15px auto 13px;
+      }
+
+      .paso-hoja {
+        gap: 5px;
+        font-size: 11px;
+      }
+
+      .paso-hoja span {
+        width: 29px;
+        height: 29px;
+        flex-basis: 29px;
+        font-size: 13px;
+      }
+
+      .titulo-hoja h5 {
+        font-size: 19px;
+      }
+
+      .tabla-aciertos,
+      .tabla-datos {
+        min-width: 0 !important;
+      }
+
+      .check-celda {
+        text-align: left;
+      }
+
+      .check-control {
+        justify-content: flex-start;
+      }
+
+      .check-control input {
+        width: 30px;
+        height: 30px;
+      }
+
+      .navegacion-hojas {
+        grid-template-columns: 1fr;
+        gap: 9px;
+      }
+
+      .boton-anterior,
+      .boton-final {
+        width: 100%;
+        min-height: 50px;
+      }
+
+      .boton-final {
+        position: sticky;
+        bottom: max(8px, env(safe-area-inset-bottom));
+        z-index: 20;
+      }
+
       .tabla-contenedor {
         margin-top: 13px;
         overflow: visible;
@@ -801,7 +998,7 @@
 
       <section id="vistaGrupos">
         <p class="indicacion">
-          Seleccione el salón para capturar aciertos, antecedente de USAER y datos de hermanos.
+          Seleccione el salón. Cada grupo cuenta con dos hojas de captura.
         </p>
 
         <div class="grupos">
@@ -844,7 +1041,9 @@
       <section id="vistaAlumnos" class="oculto">
         <div class="cabecera-grupo">
           <div class="barra">
-            <button id="btnVolver" class="boton-volver" type="button">← Volver</button>
+            <button id="btnVolverGrupos" class="boton-volver" type="button">
+              ← Grupos
+            </button>
             <h4 id="tituloGrupo">Lista de alumnos</h4>
           </div>
 
@@ -864,29 +1063,82 @@
         <div id="estado" class="estado">Cargando alumnos...</div>
 
         <div id="contenidoLista" class="oculto">
-          <div class="tabla-contenedor">
-            <table>
-              <thead>
-                <tr>
-                  <th class="col-numero">Núm.</th>
-                  <th>Nombre del alumno</th>
-                  <th class="col-aciertos">Aciertos</th>
-                  <th class="col-si-no">USAER en primaria</th>
-                  <th class="col-si-no">Hermano(a) en la escuela</th>
-                  <th class="col-grado-grupo">Grado y grupo</th>
-                </tr>
-              </thead>
-              <tbody id="cuerpoAlumnos"></tbody>
-            </table>
+          <div class="indicador-hojas" aria-label="Progreso de captura">
+            <div id="paso1" class="paso-hoja activo">
+              <span>1</span>
+              <strong>Aciertos</strong>
+            </div>
+            <div class="linea-pasos"></div>
+            <div id="paso2" class="paso-hoja">
+              <span>2</span>
+              <strong>USAER y hermanos</strong>
+            </div>
           </div>
 
-          <p class="nota-rango">
-            Los aciertos deben estar entre 0 y 42. Active Sí únicamente cuando corresponda.
-          </p>
+          <section id="hojaAciertos" class="hoja-captura">
+            <div class="titulo-hoja">
+              <p>Hoja 1 de 2</p>
+              <h5>Captura de aciertos</h5>
+            </div>
 
-          <button id="btnGuardar" class="boton-guardar" type="button">
-            Guardar resultados
-          </button>
+            <div class="tabla-contenedor">
+              <table class="tabla-aciertos">
+                <thead>
+                  <tr>
+                    <th class="col-numero">Núm.</th>
+                    <th>Nombre del alumno</th>
+                    <th class="col-aciertos">Aciertos</th>
+                  </tr>
+                </thead>
+                <tbody id="cuerpoAciertos"></tbody>
+              </table>
+            </div>
+
+            <p class="nota-rango">
+              Capture un número entero de 0 a 42 para cada alumno.
+            </p>
+
+            <button id="btnContinuar" class="boton-guardar" type="button">
+              Continuar a USAER y hermanos →
+            </button>
+          </section>
+
+          <section id="hojaDatos" class="hoja-captura oculto">
+            <div class="titulo-hoja">
+              <p>Hoja 2 de 2</p>
+              <h5>Registro de USAER y hermanos</h5>
+            </div>
+
+            <p class="instruccion-check">
+              Marque la casilla únicamente cuando corresponda. Las casillas sin
+              marcar se guardarán automáticamente como <strong>No</strong>.
+            </p>
+
+            <div class="tabla-contenedor">
+              <table class="tabla-datos">
+                <thead>
+                  <tr>
+                    <th class="col-numero">Núm.</th>
+                    <th>Nombre del alumno</th>
+                    <th class="col-check">USAER</th>
+                    <th class="col-check">Hermanos</th>
+                    <th class="col-grado-grupo">Grado y grupo</th>
+                  </tr>
+                </thead>
+                <tbody id="cuerpoDatos"></tbody>
+              </table>
+            </div>
+
+            <div class="navegacion-hojas">
+              <button id="btnAnterior" class="boton-anterior" type="button">
+                ← Regresar a aciertos
+              </button>
+
+              <button id="btnGuardar" class="boton-guardar boton-final" type="button">
+                Guardar toda la información
+              </button>
+            </div>
+          </section>
         </div>
 
         <div id="mensaje" class="oculto"></div>
@@ -956,12 +1208,20 @@
     const responsable2 = document.getElementById("responsable2");
     const estado = document.getElementById("estado");
     const contenidoLista = document.getElementById("contenidoLista");
-    const cuerpoAlumnos = document.getElementById("cuerpoAlumnos");
+    const hojaAciertos = document.getElementById("hojaAciertos");
+    const hojaDatos = document.getElementById("hojaDatos");
+    const cuerpoAciertos = document.getElementById("cuerpoAciertos");
+    const cuerpoDatos = document.getElementById("cuerpoDatos");
+    const paso1 = document.getElementById("paso1");
+    const paso2 = document.getElementById("paso2");
     const mensaje = document.getElementById("mensaje");
+    const btnContinuar = document.getElementById("btnContinuar");
+    const btnAnterior = document.getElementById("btnAnterior");
     const btnGuardar = document.getElementById("btnGuardar");
 
     let grupoSeleccionado = "";
     let alumnosActuales = [];
+    let hojaActual = 1;
 
     document.querySelectorAll(".boton-grupo").forEach((boton) => {
       boton.addEventListener("click", () => {
@@ -970,10 +1230,15 @@
       });
     });
 
-    document.getElementById("btnVolver").addEventListener("click", volver);
+    document
+      .getElementById("btnVolverGrupos")
+      .addEventListener("click", volverAGrupos);
+
+    btnContinuar.addEventListener("click", continuarAHojaDatos);
+    btnAnterior.addEventListener("click", regresarAHojaAciertos);
     btnGuardar.addEventListener("click", guardarResultados);
 
-    cuerpoAlumnos.addEventListener("change", (evento) => {
+    cuerpoDatos.addEventListener("change", (evento) => {
       const control = evento.target;
 
       if (
@@ -981,7 +1246,7 @@
       ) {
         actualizarCampoHermano(
           Number(control.dataset.indice),
-          control.checked ? "Sí" : "No"
+          control.checked
         );
       }
     });
@@ -1009,31 +1274,50 @@
         const datos = await respuesta.json();
 
         if (!datos.ok) {
-          throw new Error(datos.mensaje || "No fue posible consultar la lista.");
+          throw new Error(
+            datos.mensaje || "No fue posible consultar la lista."
+          );
         }
 
-        alumnosActuales = Array.isArray(datos.alumnos) ? datos.alumnos : [];
-        mostrarTabla(alumnosActuales);
+        alumnosActuales = Array.isArray(datos.alumnos)
+          ? datos.alumnos.map((alumno) => ({
+              ...alumno,
+              usaer: normalizarRespuesta(alumno.usaer) || "No",
+              hermano: normalizarRespuesta(alumno.hermano) || "No",
+              gradoGrupo: String(alumno.gradoGrupo || "").trim()
+            }))
+          : [];
+
+        if (alumnosActuales.length === 0) {
+          estado.textContent =
+            "No se encontraron alumnos registrados en este salón.";
+          return;
+        }
+
+        mostrarHojaAciertos();
+        estado.classList.add("oculto");
+        contenidoLista.classList.remove("oculto");
       } catch (error) {
         estado.textContent = `Error: ${error.message}`;
       }
     }
 
-    function mostrarTabla(alumnos) {
-      cuerpoAlumnos.innerHTML = "";
+    function mostrarHojaAciertos() {
+      hojaActual = 1;
+      ocultarMensaje();
+      hojaAciertos.classList.remove("oculto");
+      hojaDatos.classList.add("oculto");
+      paso1.classList.add("activo");
+      paso2.classList.remove("activo");
+      construirTablaAciertos();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
 
-      if (alumnos.length === 0) {
-        estado.textContent = "No se encontraron alumnos registrados en este salón.";
-        contenidoLista.classList.add("oculto");
-        return;
-      }
+    function construirTablaAciertos() {
+      cuerpoAciertos.innerHTML = "";
 
-      alumnos.forEach((alumno, indice) => {
+      alumnosActuales.forEach((alumno, indice) => {
         const fila = document.createElement("tr");
-        const valorUSAER = normalizarRespuesta(alumno.usaer);
-        const valorHermano = normalizarRespuesta(alumno.hermano);
-        const tieneUSAER = valorUSAER === "Sí";
-        const tieneHermano = valorHermano === "Sí";
 
         fila.innerHTML = `
           <td class="col-numero" data-label="Núm.">
@@ -1058,35 +1342,121 @@
               placeholder="0"
             >
           </td>
+        `;
 
-          <td class="col-si-no" data-label="USAER en primaria">
-            <div class="opciones-si-no">
-              <label class="opcion-radio">
-                <input
-                  type="checkbox"
-                  data-campo="usaer"
-                  data-indice="${indice}"
-                  ${tieneUSAER ? "checked" : ""}
-                  aria-label="Marcar si ${escaparHTML(alumno.nombre)} recibió USAER en primaria"
-                >
-                <span>Sí</span>
-              </label>
-            </div>
+        cuerpoAciertos.appendChild(fila);
+      });
+    }
+
+    function continuarAHojaDatos() {
+      ocultarMensaje();
+      limpiarMarcasInvalidas();
+
+      if (!capturarYValidarAciertos()) {
+        return;
+      }
+
+      mostrarHojaDatos();
+    }
+
+    function capturarYValidarAciertos() {
+      const registrosAciertos = alumnosActuales.map((alumno, indice) => {
+        const campo = document.querySelector(
+          `input.input-aciertos[data-indice="${indice}"]`
+        );
+
+        return campo.value === "" ? "" : Number(campo.value);
+      });
+
+      const indiceVacio = registrosAciertos.findIndex(
+        (valor) => valor === ""
+      );
+
+      if (indiceVacio >= 0) {
+        marcarPrimerError(indiceVacio, "aciertos");
+        mostrarMensaje(
+          "Debe capturar los aciertos de todos los alumnos antes de continuar.",
+          "error"
+        );
+        return false;
+      }
+
+      const indiceInvalido = registrosAciertos.findIndex(
+        (valor) =>
+          !Number.isInteger(valor) ||
+          valor < 0 ||
+          valor > 42
+      );
+
+      if (indiceInvalido >= 0) {
+        marcarPrimerError(indiceInvalido, "aciertos");
+        mostrarMensaje(
+          "Los aciertos deben ser números enteros entre 0 y 42.",
+          "error"
+        );
+        return false;
+      }
+
+      registrosAciertos.forEach((valor, indice) => {
+        alumnosActuales[indice].aciertos = valor;
+      });
+
+      return true;
+    }
+
+    function mostrarHojaDatos() {
+      hojaActual = 2;
+      ocultarMensaje();
+      hojaAciertos.classList.add("oculto");
+      hojaDatos.classList.remove("oculto");
+      paso1.classList.remove("activo");
+      paso2.classList.add("activo");
+      construirTablaDatos();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function construirTablaDatos() {
+      cuerpoDatos.innerHTML = "";
+
+      alumnosActuales.forEach((alumno, indice) => {
+        const tieneUSAER =
+          normalizarRespuesta(alumno.usaer) === "Sí";
+        const tieneHermano =
+          normalizarRespuesta(alumno.hermano) === "Sí";
+
+        const fila = document.createElement("tr");
+
+        fila.innerHTML = `
+          <td class="col-numero" data-label="Núm.">
+            ${escaparHTML(alumno.numero || indice + 1)}
           </td>
 
-          <td class="col-si-no" data-label="Hermano(a) en la escuela">
-            <div class="opciones-si-no">
-              <label class="opcion-radio">
-                <input
-                  type="checkbox"
-                  data-campo="hermano"
-                  data-indice="${indice}"
-                  ${tieneHermano ? "checked" : ""}
-                  aria-label="Marcar si ${escaparHTML(alumno.nombre)} tendrá hermano o hermana en la escuela"
-                >
-                <span>Sí</span>
-              </label>
-            </div>
+          <td data-label="Alumno">
+            ${escaparHTML(alumno.nombre)}
+          </td>
+
+          <td class="check-celda" data-label="USAER">
+            <label class="check-control">
+              <input
+                type="checkbox"
+                data-campo="usaer"
+                data-indice="${indice}"
+                ${tieneUSAER ? "checked" : ""}
+                aria-label="USAER de ${escaparHTML(alumno.nombre)}"
+              >
+            </label>
+          </td>
+
+          <td class="check-celda" data-label="Hermanos">
+            <label class="check-control">
+              <input
+                type="checkbox"
+                data-campo="hermano"
+                data-indice="${indice}"
+                ${tieneHermano ? "checked" : ""}
+                aria-label="Hermanos de ${escaparHTML(alumno.nombre)}"
+              >
+            </label>
           </td>
 
           <td class="col-grado-grupo" data-label="Grado y grupo">
@@ -1100,7 +1470,7 @@
                 maxlength="80"
                 data-grado-grupo="${indice}"
                 value="${escaparHTML(alumno.gradoGrupo || "")}"
-                aria-label="Grado y grupo del hermano o hermana de ${escaparHTML(alumno.nombre)}"
+                aria-label="Grado y grupo del hermano de ${escaparHTML(alumno.nombre)}"
                 placeholder="Ej. 2° B"
                 ${tieneHermano ? "" : "disabled"}
               >
@@ -1115,112 +1485,66 @@
           </td>
         `;
 
-        cuerpoAlumnos.appendChild(fila);
+        cuerpoDatos.appendChild(fila);
       });
+    }
 
-      estado.classList.add("oculto");
-      contenidoLista.classList.remove("oculto");
+    function capturarDatosComplementarios() {
+      alumnosActuales.forEach((alumno, indice) => {
+        const usaer = document.querySelector(
+          `input[data-campo="usaer"][data-indice="${indice}"]`
+        );
+
+        const hermano = document.querySelector(
+          `input[data-campo="hermano"][data-indice="${indice}"]`
+        );
+
+        const gradoGrupo = document.querySelector(
+          `input[data-grado-grupo="${indice}"]`
+        );
+
+        alumno.usaer = usaer.checked ? "Sí" : "No";
+        alumno.hermano = hermano.checked ? "Sí" : "No";
+        alumno.gradoGrupo =
+          hermano.checked ? gradoGrupo.value.trim() : "";
+      });
+    }
+
+    function regresarAHojaAciertos() {
+      capturarDatosComplementarios();
+      mostrarHojaAciertos();
     }
 
     async function guardarResultados() {
       ocultarMensaje();
       limpiarMarcasInvalidas();
+      capturarDatosComplementarios();
 
-      const registros = alumnosActuales.map((alumno, indice) => {
-        const inputAciertos =
-          document.querySelector(`input.input-aciertos[data-indice="${indice}"]`);
-
-        const opcionUSAER =
-          document.querySelector(
-            `input[type="checkbox"][data-campo="usaer"][data-indice="${indice}"]`
-          );
-
-        const opcionHermano =
-          document.querySelector(
-            `input[type="checkbox"][data-campo="hermano"][data-indice="${indice}"]`
-          );
-
-        const inputGradoGrupo =
-          document.querySelector(`input[data-grado-grupo="${indice}"]`);
-
-        const usaer = opcionUSAER.checked ? "Sí" : "No";
-        const hermano = opcionHermano.checked ? "Sí" : "No";
-
-        return {
-          fila: alumno.fila,
-          numero: alumno.numero,
-          curp: alumno.curp,
-          grupo: grupoSeleccionado,
-          aciertos:
-            inputAciertos.value === "" ? "" : Number(inputAciertos.value),
-          usaer: usaer,
-          hermano: hermano,
-          gradoGrupo:
-            hermano === "Sí" ? inputGradoGrupo.value.trim() : ""
-        };
-      });
-
-      const sinAciertos = registros.filter(
-        (registro) => registro.aciertos === ""
+      const indiceSinGrado = alumnosActuales.findIndex(
+        (alumno) =>
+          alumno.hermano === "Sí" &&
+          alumno.gradoGrupo === ""
       );
 
-      if (sinAciertos.length > 0) {
-        marcarPrimerError(
-          registros.findIndex((registro) => registro.aciertos === ""),
-          "aciertos"
-        );
+      if (indiceSinGrado >= 0) {
+        marcarPrimerError(indiceSinGrado, "gradoGrupo");
         mostrarMensaje(
-          `Falta capturar el resultado de ${sinAciertos.length} alumno(s).`,
+          "Escriba el grado y grupo de cada alumno que tenga hermanos en la escuela.",
           "error"
         );
         return;
       }
 
-      const aciertosInvalidos = registros.filter(
-        (registro) =>
-          !Number.isInteger(registro.aciertos) ||
-          registro.aciertos < 0 ||
-          registro.aciertos > 42
-      );
-
-      if (aciertosInvalidos.length > 0) {
-        marcarPrimerError(
-          registros.findIndex(
-            (registro) =>
-              !Number.isInteger(registro.aciertos) ||
-              registro.aciertos < 0 ||
-              registro.aciertos > 42
-          ),
-          "aciertos"
-        );
-        mostrarMensaje(
-          "Los aciertos deben ser números enteros entre 0 y 42.",
-          "error"
-        );
-        return;
-      }
-
-      const sinGradoGrupo = registros.filter(
-        (registro) =>
-          registro.hermano === "Sí" &&
-          registro.gradoGrupo === ""
-      );
-
-      if (sinGradoGrupo.length > 0) {
-        marcarPrimerError(
-          registros.findIndex(
-            (registro) =>
-              registro.hermano === "Sí" &&
-              registro.gradoGrupo === ""
-          ),
-          "gradoGrupo"
-        );
-        mostrarMensaje(
-          `Falta escribir el grado y grupo del hermano(a) de ${sinGradoGrupo.length} alumno(s).`,
-          "error"
-        );
-        return;
-      }
+      const registros = alumnosActuales.map((alumno) => ({
+        fila: alumno.fila,
+        numero: alumno.numero,
+        curp: alumno.curp,
+        grupo: grupoSeleccionado,
+        aciertos: Number(alumno.aciertos),
+        usaer: alumno.usaer,
+        hermano: alumno.hermano,
+        gradoGrupo: alumno.gradoGrupo
+      }));
 
       btnGuardar.disabled = true;
       btnGuardar.textContent = "Guardando información...";
@@ -1255,23 +1579,26 @@
         mostrarMensaje(`Error: ${error.message}`, "error");
       } finally {
         btnGuardar.disabled = false;
-        btnGuardar.textContent = "Guardar resultados";
+        btnGuardar.textContent = "Guardar toda la información";
       }
     }
 
-    function volver() {
+    function volverAGrupos() {
       alumnosActuales = [];
       grupoSeleccionado = "";
-      cuerpoAlumnos.innerHTML = "";
+      hojaActual = 1;
+      cuerpoAciertos.innerHTML = "";
+      cuerpoDatos.innerHTML = "";
       contenidoLista.classList.add("oculto");
       estado.classList.remove("oculto");
       ocultarMensaje();
 
       vistaAlumnos.classList.add("oculto");
       vistaGrupos.classList.remove("oculto");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    function actualizarCampoHermano(indice, valor) {
+    function actualizarCampoHermano(indice, marcado) {
       const detalle =
         document.querySelector(`[data-detalle-hermano="${indice}"]`);
       const noAplica =
@@ -1279,15 +1606,15 @@
       const campo =
         document.querySelector(`input[data-grado-grupo="${indice}"]`);
 
-      const mostrar = normalizarRespuesta(valor) === "Sí";
+      detalle.classList.toggle("oculto", !marcado);
+      noAplica.classList.toggle("oculto", marcado);
+      campo.disabled = !marcado;
 
-      detalle.classList.toggle("oculto", !mostrar);
-      noAplica.classList.toggle("oculto", mostrar);
-      campo.disabled = !mostrar;
-
-      if (!mostrar) {
+      if (!marcado) {
         campo.value = "";
         campo.classList.remove("campo-invalido");
+      } else {
+        setTimeout(() => campo.focus(), 100);
       }
     }
 
@@ -1323,21 +1650,13 @@
       let elemento = null;
 
       if (campo === "aciertos") {
-        elemento =
-          document.querySelector(`input.input-aciertos[data-indice="${indice}"]`);
-      } else if (campo === "usaer") {
-        elemento =
-          document.querySelector(
-            `input[type="checkbox"][data-campo="usaer"][data-indice="${indice}"] + span`
-          );
-      } else if (campo === "hermano") {
-        elemento =
-          document.querySelector(
-            `input[type="checkbox"][data-campo="hermano"][data-indice="${indice}"] + span`
-          );
+        elemento = document.querySelector(
+          `input.input-aciertos[data-indice="${indice}"]`
+        );
       } else if (campo === "gradoGrupo") {
-        elemento =
-          document.querySelector(`input[data-grado-grupo="${indice}"]`);
+        elemento = document.querySelector(
+          `input[data-grado-grupo="${indice}"]`
+        );
       }
 
       if (elemento) {
@@ -1347,9 +1666,7 @@
           block: "center"
         });
 
-        if (typeof elemento.focus === "function") {
-          setTimeout(() => elemento.focus(), 300);
-        }
+        setTimeout(() => elemento.focus(), 300);
       }
     }
 

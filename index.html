@@ -312,7 +312,7 @@
     }
 
     input[type="number"] {
-      width: 112px;
+      width: 62px;
       padding: 10px;
       border: 1px solid #9d9185;
       border-radius: 7px;
@@ -361,6 +361,104 @@
       color: #756c64;
       text-align: center;
       font-size: 13px;
+    }
+
+
+    .col-si-no {
+      width: 190px;
+      text-align: center;
+    }
+
+    .col-grado-grupo {
+      width: 205px;
+      text-align: center;
+    }
+
+    .opciones-si-no {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .opcion-radio {
+      position: relative;
+      display: inline-flex;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .opcion-radio input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .opcion-radio span {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 70px;
+      min-height: 40px;
+      padding: 8px 12px;
+      color: var(--guinda);
+      background: #fffaf3;
+      border: 1px solid var(--dorado);
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      transition: 0.15s ease;
+    }
+
+    .opcion-radio input:checked + span {
+      color: var(--blanco);
+      background: var(--guinda);
+      border-color: var(--guinda);
+      box-shadow: 0 2px 7px rgba(105, 28, 50, 0.22);
+    }
+
+    .opcion-radio input:focus-visible + span {
+      outline: 3px solid rgba(188, 149, 92, 0.45);
+      outline-offset: 2px;
+    }
+
+    .detalle-hermano {
+      width: 100%;
+    }
+
+    .input-grado-grupo {
+      width: 100%;
+      min-width: 145px;
+      padding: 10px;
+      color: #222;
+      background: #fffdf9;
+      border: 1px solid #9d9185;
+      border-radius: 7px;
+      font-size: 15px;
+      text-align: center;
+    }
+
+    .input-grado-grupo:focus {
+      outline: 3px solid rgba(188, 149, 92, 0.35);
+      border-color: var(--dorado);
+    }
+
+    .no-aplica {
+      color: #82786e;
+      font-size: 13px;
+      font-style: italic;
+    }
+
+    .campo-invalido {
+      border-color: #b91c1c !important;
+      background: #fff1f1 !important;
+    }
+
+    @media (min-width: 761px) {
+      table {
+        min-width: 1120px;
+      }
     }
 
     @media (max-width: 760px) {
@@ -555,14 +653,39 @@
       }
 
       .col-numero,
-      .col-aciertos {
+      .col-aciertos,
+      .col-si-no,
+      .col-grado-grupo {
         width: auto;
         text-align: left;
       }
 
-      input[type="number"] {
+      .opciones-si-no {
+        justify-content: flex-start;
+      }
+
+      .opcion-radio {
+        flex: 0 0 auto;
+      }
+
+      .opcion-radio span {
+        width: 82px;
+        min-width: 82px;
+        min-height: 44px;
+        font-size: 15px;
+      }
+
+      .input-grado-grupo {
         width: 100%;
-        max-width: none;
+        min-width: 0;
+        min-height: 46px;
+        font-size: 16px;
+        text-align: left;
+      }
+
+      input[type="number"] {
+        width: 62px;
+        max-width: 62px;
         min-height: 46px;
         padding: 9px 12px;
         font-size: 18px;
@@ -678,7 +801,7 @@
 
       <section id="vistaGrupos">
         <p class="indicacion">
-          Seleccione el salón para consultar la lista de alumnos y capturar sus aciertos.
+          Seleccione el salón para capturar aciertos, antecedente de USAER y datos de hermanos.
         </p>
 
         <div class="grupos">
@@ -748,13 +871,18 @@
                   <th class="col-numero">Núm.</th>
                   <th>Nombre del alumno</th>
                   <th class="col-aciertos">Aciertos</th>
+                  <th class="col-si-no">USAER en primaria</th>
+                  <th class="col-si-no">Hermano(a) en la escuela</th>
+                  <th class="col-grado-grupo">Grado y grupo</th>
                 </tr>
               </thead>
               <tbody id="cuerpoAlumnos"></tbody>
             </table>
           </div>
 
-          <p class="nota-rango">Valor permitido: de 0 a 42 aciertos.</p>
+          <p class="nota-rango">
+            Los aciertos deben estar entre 0 y 42. Active Sí únicamente cuando corresponda.
+          </p>
 
           <button id="btnGuardar" class="boton-guardar" type="button">
             Guardar resultados
@@ -845,6 +973,19 @@
     document.getElementById("btnVolver").addEventListener("click", volver);
     btnGuardar.addEventListener("click", guardarResultados);
 
+    cuerpoAlumnos.addEventListener("change", (evento) => {
+      const control = evento.target;
+
+      if (
+        control.matches('input[type="checkbox"][data-campo="hermano"]')
+      ) {
+        actualizarCampoHermano(
+          Number(control.dataset.indice),
+          control.checked ? "Sí" : "No"
+        );
+      }
+    });
+
     async function consultarAlumnos() {
       vistaGrupos.classList.add("oculto");
       vistaAlumnos.classList.remove("oculto");
@@ -889,12 +1030,23 @@
 
       alumnos.forEach((alumno, indice) => {
         const fila = document.createElement("tr");
+        const valorUSAER = normalizarRespuesta(alumno.usaer);
+        const valorHermano = normalizarRespuesta(alumno.hermano);
+        const tieneUSAER = valorUSAER === "Sí";
+        const tieneHermano = valorHermano === "Sí";
 
         fila.innerHTML = `
-          <td class="col-numero" data-label="Núm.">${escaparHTML(alumno.numero || indice + 1)}</td>
-          <td data-label="Alumno">${escaparHTML(alumno.nombre)}</td>
+          <td class="col-numero" data-label="Núm.">
+            ${escaparHTML(alumno.numero || indice + 1)}
+          </td>
+
+          <td data-label="Alumno">
+            ${escaparHTML(alumno.nombre)}
+          </td>
+
           <td class="col-aciertos" data-label="Aciertos">
             <input
+              class="input-aciertos"
               type="number"
               min="0"
               max="42"
@@ -905,6 +1057,61 @@
               aria-label="Aciertos de ${escaparHTML(alumno.nombre)}"
               placeholder="0"
             >
+          </td>
+
+          <td class="col-si-no" data-label="USAER en primaria">
+            <div class="opciones-si-no">
+              <label class="opcion-radio">
+                <input
+                  type="checkbox"
+                  data-campo="usaer"
+                  data-indice="${indice}"
+                  ${tieneUSAER ? "checked" : ""}
+                  aria-label="Marcar si ${escaparHTML(alumno.nombre)} recibió USAER en primaria"
+                >
+                <span>Sí</span>
+              </label>
+            </div>
+          </td>
+
+          <td class="col-si-no" data-label="Hermano(a) en la escuela">
+            <div class="opciones-si-no">
+              <label class="opcion-radio">
+                <input
+                  type="checkbox"
+                  data-campo="hermano"
+                  data-indice="${indice}"
+                  ${tieneHermano ? "checked" : ""}
+                  aria-label="Marcar si ${escaparHTML(alumno.nombre)} tendrá hermano o hermana en la escuela"
+                >
+                <span>Sí</span>
+              </label>
+            </div>
+          </td>
+
+          <td class="col-grado-grupo" data-label="Grado y grupo">
+            <div
+              class="detalle-hermano ${tieneHermano ? "" : "oculto"}"
+              data-detalle-hermano="${indice}"
+            >
+              <input
+                class="input-grado-grupo"
+                type="text"
+                maxlength="80"
+                data-grado-grupo="${indice}"
+                value="${escaparHTML(alumno.gradoGrupo || "")}"
+                aria-label="Grado y grupo del hermano o hermana de ${escaparHTML(alumno.nombre)}"
+                placeholder="Ej. 2° B"
+                ${tieneHermano ? "" : "disabled"}
+              >
+            </div>
+
+            <span
+              class="no-aplica ${tieneHermano ? "oculto" : ""}"
+              data-no-aplica="${indice}"
+            >
+              No aplica
+            </span>
           </td>
         `;
 
@@ -917,37 +1124,75 @@
 
     async function guardarResultados() {
       ocultarMensaje();
+      limpiarMarcasInvalidas();
 
       const registros = alumnosActuales.map((alumno, indice) => {
-        const input = document.querySelector(`input[data-indice="${indice}"]`);
+        const inputAciertos =
+          document.querySelector(`input.input-aciertos[data-indice="${indice}"]`);
+
+        const opcionUSAER =
+          document.querySelector(
+            `input[type="checkbox"][data-campo="usaer"][data-indice="${indice}"]`
+          );
+
+        const opcionHermano =
+          document.querySelector(
+            `input[type="checkbox"][data-campo="hermano"][data-indice="${indice}"]`
+          );
+
+        const inputGradoGrupo =
+          document.querySelector(`input[data-grado-grupo="${indice}"]`);
+
+        const usaer = opcionUSAER.checked ? "Sí" : "No";
+        const hermano = opcionHermano.checked ? "Sí" : "No";
 
         return {
           fila: alumno.fila,
           numero: alumno.numero,
           curp: alumno.curp,
           grupo: grupoSeleccionado,
-          aciertos: input.value === "" ? "" : Number(input.value)
+          aciertos:
+            inputAciertos.value === "" ? "" : Number(inputAciertos.value),
+          usaer: usaer,
+          hermano: hermano,
+          gradoGrupo:
+            hermano === "Sí" ? inputGradoGrupo.value.trim() : ""
         };
       });
 
-      const faltantes = registros.filter((registro) => registro.aciertos === "");
+      const sinAciertos = registros.filter(
+        (registro) => registro.aciertos === ""
+      );
 
-      if (faltantes.length > 0) {
+      if (sinAciertos.length > 0) {
+        marcarPrimerError(
+          registros.findIndex((registro) => registro.aciertos === ""),
+          "aciertos"
+        );
         mostrarMensaje(
-          `Falta capturar el resultado de ${faltantes.length} alumno(s).`,
+          `Falta capturar el resultado de ${sinAciertos.length} alumno(s).`,
           "error"
         );
         return;
       }
 
-      const invalidos = registros.filter(
+      const aciertosInvalidos = registros.filter(
         (registro) =>
           !Number.isInteger(registro.aciertos) ||
           registro.aciertos < 0 ||
           registro.aciertos > 42
       );
 
-      if (invalidos.length > 0) {
+      if (aciertosInvalidos.length > 0) {
+        marcarPrimerError(
+          registros.findIndex(
+            (registro) =>
+              !Number.isInteger(registro.aciertos) ||
+              registro.aciertos < 0 ||
+              registro.aciertos > 42
+          ),
+          "aciertos"
+        );
         mostrarMensaje(
           "Los aciertos deben ser números enteros entre 0 y 42.",
           "error"
@@ -955,8 +1200,30 @@
         return;
       }
 
+      const sinGradoGrupo = registros.filter(
+        (registro) =>
+          registro.hermano === "Sí" &&
+          registro.gradoGrupo === ""
+      );
+
+      if (sinGradoGrupo.length > 0) {
+        marcarPrimerError(
+          registros.findIndex(
+            (registro) =>
+              registro.hermano === "Sí" &&
+              registro.gradoGrupo === ""
+          ),
+          "gradoGrupo"
+        );
+        mostrarMensaje(
+          `Falta escribir el grado y grupo del hermano(a) de ${sinGradoGrupo.length} alumno(s).`,
+          "error"
+        );
+        return;
+      }
+
       btnGuardar.disabled = true;
-      btnGuardar.textContent = "Guardando resultados...";
+      btnGuardar.textContent = "Guardando información...";
 
       try {
         const formulario = new URLSearchParams();
@@ -975,11 +1242,13 @@
         const datos = await respuesta.json();
 
         if (!datos.ok) {
-          throw new Error(datos.mensaje || "No fue posible guardar los resultados.");
+          throw new Error(
+            datos.mensaje || "No fue posible guardar la información."
+          );
         }
 
         mostrarMensaje(
-          `Se guardaron correctamente los resultados de ${datos.guardados} alumno(s).`,
+          `Se guardó correctamente la información de ${datos.guardados} alumno(s).`,
           "exito"
         );
       } catch (error) {
@@ -1000,6 +1269,88 @@
 
       vistaAlumnos.classList.add("oculto");
       vistaGrupos.classList.remove("oculto");
+    }
+
+    function actualizarCampoHermano(indice, valor) {
+      const detalle =
+        document.querySelector(`[data-detalle-hermano="${indice}"]`);
+      const noAplica =
+        document.querySelector(`[data-no-aplica="${indice}"]`);
+      const campo =
+        document.querySelector(`input[data-grado-grupo="${indice}"]`);
+
+      const mostrar = normalizarRespuesta(valor) === "Sí";
+
+      detalle.classList.toggle("oculto", !mostrar);
+      noAplica.classList.toggle("oculto", mostrar);
+      campo.disabled = !mostrar;
+
+      if (!mostrar) {
+        campo.value = "";
+        campo.classList.remove("campo-invalido");
+      }
+    }
+
+    function normalizarRespuesta(valor) {
+      const texto = String(valor ?? "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .toUpperCase();
+
+      if (["SI", "S", "TRUE", "1", "X"].includes(texto)) {
+        return "Sí";
+      }
+
+      if (["NO", "N", "FALSE", "0"].includes(texto)) {
+        return "No";
+      }
+
+      return "";
+    }
+
+    function limpiarMarcasInvalidas() {
+      document
+        .querySelectorAll(".campo-invalido")
+        .forEach((elemento) => elemento.classList.remove("campo-invalido"));
+    }
+
+    function marcarPrimerError(indice, campo) {
+      if (indice < 0) {
+        return;
+      }
+
+      let elemento = null;
+
+      if (campo === "aciertos") {
+        elemento =
+          document.querySelector(`input.input-aciertos[data-indice="${indice}"]`);
+      } else if (campo === "usaer") {
+        elemento =
+          document.querySelector(
+            `input[type="checkbox"][data-campo="usaer"][data-indice="${indice}"] + span`
+          );
+      } else if (campo === "hermano") {
+        elemento =
+          document.querySelector(
+            `input[type="checkbox"][data-campo="hermano"][data-indice="${indice}"] + span`
+          );
+      } else if (campo === "gradoGrupo") {
+        elemento =
+          document.querySelector(`input[data-grado-grupo="${indice}"]`);
+      }
+
+      if (elemento) {
+        elemento.classList.add("campo-invalido");
+        elemento.scrollIntoView({
+          behavior: "smooth",
+          block: "center"
+        });
+
+        if (typeof elemento.focus === "function") {
+          setTimeout(() => elemento.focus(), 300);
+        }
+      }
     }
 
     function mostrarMensaje(texto, tipo) {

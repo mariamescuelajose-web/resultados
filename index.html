@@ -133,6 +133,20 @@
       -webkit-tap-highlight-color: transparent;
     }
 
+    /* Retroalimentación visual al presionar cualquier botón. */
+    button.boton-presionado {
+      color: var(--guinda-oscuro) !important;
+      background: var(--dorado) !important;
+      border-color: var(--guinda-oscuro) !important;
+      box-shadow: 0 3px 9px rgba(79, 20, 37, 0.28) !important;
+      transform: scale(0.97) !important;
+      filter: none !important;
+    }
+
+    button.boton-presionado span {
+      color: inherit !important;
+    }
+
     .boton-grupo {
       min-height: 92px;
       padding: 16px;
@@ -585,11 +599,11 @@
     }
 
     .tabla-aciertos {
-      min-width: 620px !important;
+      min-width: 540px !important;
     }
 
     .tabla-datos {
-      min-width: 850px !important;
+      min-width: 760px !important;
     }
 
     .col-check {
@@ -1137,14 +1151,13 @@
             </div>
 
             <p class="aviso-bloqueo">
-              Los resultados que ya estén guardados aparecerán bloqueados y no podrán modificarse.
+              Si el alumno no se presentó, por favor coloque solamente un 0 (cero). Los resultados que ya estén guardados aparecerán bloqueados y no podrán modificarse.
             </p>
 
             <div class="tabla-contenedor">
               <table class="tabla-aciertos">
                 <thead>
                   <tr>
-                    <th class="col-numero">Núm.</th>
                     <th>Nombre del alumno</th>
                     <th class="col-aciertos">Aciertos</th>
                   </tr>
@@ -1178,7 +1191,6 @@
               <table class="tabla-datos">
                 <thead>
                   <tr>
-                    <th class="col-numero">Núm.</th>
                     <th>Nombre del alumno</th>
                     <th class="col-check">USAER</th>
                     <th class="col-check">Hermanos</th>
@@ -1282,6 +1294,22 @@
     let grupoSeleccionado = "";
     let alumnosActuales = [];
     let hojaActual = 1;
+
+    document.addEventListener("click", (evento) => {
+      const boton = evento.target.closest("button");
+
+      if (!boton || boton.disabled) {
+        return;
+      }
+
+      boton.classList.remove("boton-presionado");
+      void boton.offsetWidth;
+      boton.classList.add("boton-presionado");
+
+      window.setTimeout(() => {
+        boton.classList.remove("boton-presionado");
+      }, 450);
+    });
 
     document.querySelectorAll(".boton-grupo").forEach((boton) => {
       boton.addEventListener("click", () => {
@@ -1388,10 +1416,6 @@
         }
 
         fila.innerHTML = `
-          <td class="col-numero" data-label="Núm.">
-            ${escaparHTML(alumno.numero || indice + 1)}
-          </td>
-
           <td data-label="Alumno">
             ${escaparHTML(alumno.nombre)}
           </td>
@@ -1515,10 +1539,6 @@
         }
 
         fila.innerHTML = `
-          <td class="col-numero" data-label="Núm.">
-            ${escaparHTML(alumno.numero || indice + 1)}
-          </td>
-
           <td data-label="Alumno">
             ${escaparHTML(alumno.nombre)}
           </td>

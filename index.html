@@ -462,6 +462,61 @@
     }
 
 
+
+    .campo-bloqueado,
+    input:disabled {
+      color: #5f5a55 !important;
+      background: #ece9e5 !important;
+      border-color: #c8c1b9 !important;
+      cursor: not-allowed !important;
+      opacity: 1;
+    }
+
+    .check-control input:disabled {
+      cursor: not-allowed;
+      opacity: 0.72;
+      filter: grayscale(0.15);
+    }
+
+    .etiqueta-bloqueado {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 5px;
+      padding: 3px 7px;
+      color: #62594f;
+      background: #eee9e3;
+      border: 1px solid #d5ccc2;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .valor-guardado {
+      display: block;
+      margin-top: 5px;
+      color: #655c53;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    tr.fila-totalmente-bloqueada {
+      background: #f4f2ef !important;
+    }
+
+    .aviso-bloqueo {
+      margin: 0 0 14px;
+      padding: 11px 14px;
+      color: #5a5148;
+      background: #f1ede8;
+      border: 1px solid #d8d0c7;
+      border-left: 4px solid var(--guinda);
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
     .indicador-hojas {
       display: grid;
       grid-template-columns: auto minmax(40px, 1fr) auto;
@@ -1081,6 +1136,10 @@
               <h5>Captura de aciertos</h5>
             </div>
 
+            <p class="aviso-bloqueo">
+              Los resultados que ya estén guardados aparecerán bloqueados y no podrán modificarse.
+            </p>
+
             <div class="tabla-contenedor">
               <table class="tabla-aciertos">
                 <thead>
@@ -1112,6 +1171,7 @@
             <p class="instruccion-check">
               Marque la casilla únicamente cuando corresponda. Las casillas sin
               marcar se guardarán automáticamente como <strong>No</strong>.
+              Los datos previamente guardados aparecerán bloqueados.
             </p>
 
             <div class="tabla-contenedor">
@@ -1284,7 +1344,11 @@
               ...alumno,
               usaer: normalizarRespuesta(alumno.usaer) || "No",
               hermano: normalizarRespuesta(alumno.hermano) || "No",
-              gradoGrupo: String(alumno.gradoGrupo || "").trim()
+              gradoGrupo: String(alumno.gradoGrupo || "").trim(),
+              bloqueadoAciertos: Boolean(alumno.bloqueadoAciertos),
+              bloqueadoUSAER: Boolean(alumno.bloqueadoUSAER),
+              bloqueadoHermano: Boolean(alumno.bloqueadoHermano),
+              bloqueadoGradoGrupo: Boolean(alumno.bloqueadoGradoGrupo)
             }))
           : [];
 
@@ -1319,6 +1383,10 @@
       alumnosActuales.forEach((alumno, indice) => {
         const fila = document.createElement("tr");
 
+        if (alumno.bloqueadoAciertos) {
+          fila.classList.add("fila-totalmente-bloqueada");
+        }
+
         fila.innerHTML = `
           <td class="col-numero" data-label="Núm.">
             ${escaparHTML(alumno.numero || indice + 1)}
@@ -1330,7 +1398,7 @@
 
           <td class="col-aciertos" data-label="Aciertos">
             <input
-              class="input-aciertos"
+              class="input-aciertos ${alumno.bloqueadoAciertos ? "campo-bloqueado" : ""}"
               type="number"
               min="0"
               max="42"
@@ -1340,7 +1408,13 @@
               value="${alumno.aciertos ?? ""}"
               aria-label="Aciertos de ${escaparHTML(alumno.nombre)}"
               placeholder="0"
+              ${alumno.bloqueadoAciertos ? "disabled" : ""}
             >
+            ${
+              alumno.bloqueadoAciertos
+                ? '<span class="etiqueta-bloqueado">🔒 Guardado</span>'
+                : ""
+            }
           </td>
         `;
 
@@ -1398,7 +1472,9 @@
       }
 
       registrosAciertos.forEach((valor, indice) => {
-        alumnosActuales[indice].aciertos = valor;
+        if (!alumnosActuales[indice].bloqueadoAciertos) {
+          alumnosActuales[indice].aciertos = valor;
+        }
       });
 
       return true;
@@ -1426,6 +1502,18 @@
 
         const fila = document.createElement("tr");
 
+        const filaBloqueada =
+          alumno.bloqueadoUSAER &&
+          alumno.bloqueadoHermano &&
+          (
+            !tieneHermano ||
+            alumno.bloqueadoGradoGrupo
+          );
+
+        if (filaBloqueada) {
+          fila.classList.add("fila-totalmente-bloqueada");
+        }
+
         fila.innerHTML = `
           <td class="col-numero" data-label="Núm.">
             ${escaparHTML(alumno.numero || indice + 1)}
@@ -1442,9 +1530,15 @@
                 data-campo="usaer"
                 data-indice="${indice}"
                 ${tieneUSAER ? "checked" : ""}
+                ${alumno.bloqueadoUSAER ? "disabled" : ""}
                 aria-label="USAER de ${escaparHTML(alumno.nombre)}"
               >
             </label>
+            ${
+              alumno.bloqueadoUSAER
+                ? `<span class="valor-guardado">🔒 ${tieneUSAER ? "Sí" : "No"}</span>`
+                : ""
+            }
           </td>
 
           <td class="check-celda" data-label="Hermanos">
@@ -1454,9 +1548,15 @@
                 data-campo="hermano"
                 data-indice="${indice}"
                 ${tieneHermano ? "checked" : ""}
+                ${alumno.bloqueadoHermano ? "disabled" : ""}
                 aria-label="Hermanos de ${escaparHTML(alumno.nombre)}"
               >
             </label>
+            ${
+              alumno.bloqueadoHermano
+                ? `<span class="valor-guardado">🔒 ${tieneHermano ? "Sí" : "No"}</span>`
+                : ""
+            }
           </td>
 
           <td class="col-grado-grupo" data-label="Grado y grupo">
@@ -1465,15 +1565,24 @@
               data-detalle-hermano="${indice}"
             >
               <input
-                class="input-grado-grupo"
+                class="input-grado-grupo ${alumno.bloqueadoGradoGrupo ? "campo-bloqueado" : ""}"
                 type="text"
                 maxlength="80"
                 data-grado-grupo="${indice}"
                 value="${escaparHTML(alumno.gradoGrupo || "")}"
                 aria-label="Grado y grupo del hermano de ${escaparHTML(alumno.nombre)}"
                 placeholder="Ej. 2° B"
-                ${tieneHermano ? "" : "disabled"}
+                ${
+                  !tieneHermano || alumno.bloqueadoGradoGrupo
+                    ? "disabled"
+                    : ""
+                }
               >
+              ${
+                alumno.bloqueadoGradoGrupo
+                  ? '<span class="etiqueta-bloqueado">🔒 Guardado</span>'
+                  : ""
+              }
             </div>
 
             <span
@@ -1487,6 +1596,8 @@
 
         cuerpoDatos.appendChild(fila);
       });
+
+      actualizarEstadoBotonGuardar();
     }
 
     function capturarDatosComplementarios() {
@@ -1503,16 +1614,51 @@
           `input[data-grado-grupo="${indice}"]`
         );
 
-        alumno.usaer = usaer.checked ? "Sí" : "No";
-        alumno.hermano = hermano.checked ? "Sí" : "No";
-        alumno.gradoGrupo =
-          hermano.checked ? gradoGrupo.value.trim() : "";
+        if (!alumno.bloqueadoUSAER) {
+          alumno.usaer = usaer.checked ? "Sí" : "No";
+        }
+
+        if (!alumno.bloqueadoHermano) {
+          alumno.hermano = hermano.checked ? "Sí" : "No";
+        }
+
+        const tieneHermano =
+          normalizarRespuesta(alumno.hermano) === "Sí";
+
+        if (!alumno.bloqueadoGradoGrupo) {
+          alumno.gradoGrupo =
+            tieneHermano ? gradoGrupo.value.trim() : "";
+        }
       });
     }
 
     function regresarAHojaAciertos() {
       capturarDatosComplementarios();
       mostrarHojaAciertos();
+    }
+
+    function actualizarEstadoBotonGuardar() {
+      const todoBloqueado =
+        alumnosActuales.length > 0 &&
+        alumnosActuales.every((alumno) => {
+          const tieneHermano =
+            normalizarRespuesta(alumno.hermano) === "Sí";
+
+          return (
+            alumno.bloqueadoAciertos &&
+            alumno.bloqueadoUSAER &&
+            alumno.bloqueadoHermano &&
+            (
+              !tieneHermano ||
+              alumno.bloqueadoGradoGrupo
+            )
+          );
+        });
+
+      btnGuardar.disabled = todoBloqueado;
+      btnGuardar.textContent = todoBloqueado
+        ? "Información guardada y bloqueada"
+        : "Guardar toda la información";
     }
 
     async function guardarResultados() {
@@ -1571,15 +1717,34 @@
           );
         }
 
+        if (Array.isArray(datos.alumnos)) {
+          alumnosActuales = datos.alumnos.map((alumno) => ({
+            ...alumno,
+            usaer: normalizarRespuesta(alumno.usaer) || "No",
+            hermano: normalizarRespuesta(alumno.hermano) || "No",
+            gradoGrupo: String(alumno.gradoGrupo || "").trim(),
+            bloqueadoAciertos: Boolean(alumno.bloqueadoAciertos),
+            bloqueadoUSAER: Boolean(alumno.bloqueadoUSAER),
+            bloqueadoHermano: Boolean(alumno.bloqueadoHermano),
+            bloqueadoGradoGrupo: Boolean(alumno.bloqueadoGradoGrupo)
+          }));
+        }
+
+        construirTablaDatos();
+
+        const guardados = Number(datos.guardados || 0);
+        const omitidos = Number(datos.omitidos || 0);
+
         mostrarMensaje(
-          `Se guardó correctamente la información de ${datos.guardados} alumno(s).`,
+          guardados > 0
+            ? `Se guardó información nueva de ${guardados} alumno(s). Los campos quedaron bloqueados.`
+            : "No se realizaron cambios porque la información ya estaba guardada y bloqueada.",
           "exito"
         );
       } catch (error) {
         mostrarMensaje(`Error: ${error.message}`, "error");
       } finally {
-        btnGuardar.disabled = false;
-        btnGuardar.textContent = "Guardar toda la información";
+        actualizarEstadoBotonGuardar();
       }
     }
 
@@ -1599,6 +1764,12 @@
     }
 
     function actualizarCampoHermano(indice, marcado) {
+      const alumno = alumnosActuales[indice];
+
+      if (!alumno || alumno.bloqueadoHermano) {
+        return;
+      }
+
       const detalle =
         document.querySelector(`[data-detalle-hermano="${indice}"]`);
       const noAplica =
@@ -1608,12 +1779,17 @@
 
       detalle.classList.toggle("oculto", !marcado);
       noAplica.classList.toggle("oculto", marcado);
-      campo.disabled = !marcado;
 
-      if (!marcado) {
+      campo.disabled =
+        !marcado || alumno.bloqueadoGradoGrupo;
+
+      if (!marcado && !alumno.bloqueadoGradoGrupo) {
         campo.value = "";
         campo.classList.remove("campo-invalido");
-      } else {
+      } else if (
+        marcado &&
+        !alumno.bloqueadoGradoGrupo
+      ) {
         setTimeout(() => campo.focus(), 100);
       }
     }
